@@ -24,8 +24,7 @@ class ListeFiches(tk.Frame):
 
         for perso in self.database.search(Query().nom.exists()):
             print(perso["nom"])
-            liste_fonctions.append(self.fiche(personnage=perso))
-            liste_persos.append(tk.Button(self, text = perso["nom"], command = liste_fonctions[-1]))
+            liste_persos.append(tk.Button(self, text = perso["nom"], command = lambda : self.fiche(perso["nom"])))
             liste_persos[-1].pack(side="top")
         self.new_fiche = tk.Button(self, text = "Nouveau Personnage", command = self.new_fiche)
         self.new_fiche.pack(side="top")
@@ -33,7 +32,8 @@ class ListeFiches(tk.Frame):
         self.back_main.pack(side="bottom")
 
     def fiche(self,personnage):
-        pass
+        self.destroy()
+        app = FichePerso(self.master,personnage,self.database)
 
     def back_menu(self):
         app = self.init_menu(self)
@@ -42,7 +42,11 @@ class FichePerso(tk.Frame):
     """ Gère l'affichage d'une fiche de personnage """
     def __init__(self, master=None, personnage=None,database=None):
         super().__init__(master)
-        self.personnage = personnage
+        if personnage:
+            self.personnage = database.search(Query().nom == personnage)
+        else:
+            self.personnage = None
+        print(self.personnage)
         self.database = database
         self.pack()
         self.master.title("Fiche Personnage")
@@ -59,20 +63,22 @@ class ResumePerso(tk.Frame):
     def __init__(self, master=None, personnage=None,database=None):
         super().__init__(master)
         self.pack()
-        self.personnage = personnage
+        if personnage:
+            self.personnage = personnage[0]
+        else : self.personnage = None
         self.database = database
         self.nom = tk.Text(self,heigh=1,width=20)
         tk.Label(self, text="Nom").grid(row=0,sticky="E")
         if self.personnage:
-            self.nom.insert(tk.END,"Nom")
+            self.nom.insert(tk.END,self.personnage["nom"])
         self.nom.grid(row=0,column=1, sticky="W")
         self.origine = tk.Text(self,heigh=1,width=20)
         if self.personnage:
-            self.origine.insert(tk.END,"Origine")
+            self.origine.insert(tk.END,self.personnage["origine"])
         tk.Label(self, text="Origine").grid(row=0,column=2,sticky="E")
         self.origine.grid(row=0,column=3,sticky="W")
         if self.personnage:
-            self.metiers = ["Mage","Clodo"]
+            self.metiers = self.personnage["metiers"]
         else : self.metiers = [""]
         self.metiers_frame = tk.Frame(self)
         self.metiers_fields = []
@@ -84,22 +90,22 @@ class ResumePerso(tk.Frame):
         self.metiers_frame.grid(row=1,column=1,sticky="W")
         self.genre = tk.Text(self,heigh=1,width=20)
         if self.personnage:
-            self.genre.insert(tk.END,"genre")
+            self.genre.insert(tk.END,self.personnage["genre"])
         tk.Label(self, text="Genre").grid(row=1,column=2,sticky="E")
         self.genre.grid(row=1,column=3,sticky="W")
         self.niveau = tk.Text(self,heigh=1,width=2)
         if self.personnage:
-            self.niveau.insert(tk.END,"00")
+            self.niveau.insert(tk.END,self.personnage["niveau"])
         tk.Label(self, text="Niveau").grid(row=0,column=4,sticky="E")
         self.niveau.grid(row=0,column=5,sticky="W")
         self.xp = tk.Text(self,heigh=1,width=2)
         if self.personnage:
-            self.xp.insert(tk.END,"00")
+            self.xp.insert(tk.END,self.personnage["xp"])
         tk.Label(self, text="Xp").grid(row=1,column=4,sticky="E")
         self.xp.grid(row=1,column=5,sticky="W")
         self.destin = tk.Text(self,heigh=1,width=2)
         if self.personnage:
-            self.destin.insert(tk.END,"00")
+            self.destin.insert(tk.END,self.personnage["destin"])
         tk.Label(self, text="Pts. Destin").grid(row=2,column=4,sticky="E")
         self.destin.grid(row=2,column=5,sticky="W")
         self.PV = [0]
